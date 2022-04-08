@@ -1,7 +1,16 @@
-import { NextPage } from "next"
-import Image from "next/image"
+import { NextPage } from "next";
+import Image from "next/image";
+import { useAddress, useDisconnect, useMetamask } from "@thirdweb-dev/react";
 
 const NftPage: NextPage = () => {
+
+    // Auth
+    const connectWithMetamask = useMetamask(); // Connect to wallet with Metamask
+    const address = useAddress(); // Get address from connected wallet
+    const disconnect = useDisconnect(); // Function to call when want to disconnect from a wallet
+
+    console.log(address);
+
     return (
       <div className="flex h-screen flex-col lg:grid lg:grid-cols-10">
         {/* Left */}
@@ -10,7 +19,6 @@ const NftPage: NextPage = () => {
                 <div className="bg-gradient-to-br from-yellow-400 to bg-purple-600 rounded-xl">
                     <div className="w-44 rounded-3xl p-2 lg:h-96 lg:w-72">
                         <Image
-                            // className="w-44 rounded-3xl lg:h-96 lg:w-72"
                             src="/images/laser_ape.png"
                             alt="Animated Ape wearing a black t-shirt and a navy captain hat with laser beam coming from the eyes."
                             height={400}
@@ -35,10 +43,20 @@ const NftPage: NextPage = () => {
                 <h3 className="w-52 cursor-pointer text-xl sm:w-80">
                     The <span className="font-extrabold underline decoration-pink-600/50">Nft Den</span> Market Place 🛒
                 </h3>
-                <button className="rounded-full bg-rose-400 px-4 py-2 text-xs text-white font-bold lg:px-5 lg:py-3 lg:text-base">Sign In</button>
+                <button onClick={() => address ? disconnect() : connectWithMetamask()} 
+                    className="rounded-full bg-rose-400 px-4 py-2 text-xs text-white font-bold lg:px-5 lg:py-3 lg:text-base"
+                >
+                    {address ? "Sign-out" : "Sign In"}
+                </button>
             </header>
 
             <hr className="my-2 border"/>
+            {address && (
+                <p className="text-center text-sm text-rose-500">
+                    Your're logged in with wallet {address.substring(0, 5)}...{address.substring(address.length - 5)}
+                </p>
+            )}
+
             {/* Content */}
             <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:justify-center">
                 <div className="w-80 pb-10 lg:h-40 overflow-hidden">
