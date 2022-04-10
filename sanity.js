@@ -26,7 +26,7 @@ if (!config.projectId) {
     );
 }
 
-export const client = createClient(config);
+export const sanityClient = createClient(config);
 
 // Helper function for generating Image URLs with only the asset reference data in your documents.
 export const urlFor = source => createImageUrlBuilder(config).image(source);
