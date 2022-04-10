@@ -1,15 +1,67 @@
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import Image from "next/image";
 import { useAddress, useDisconnect, useMetamask } from "@thirdweb-dev/react";
+import { sanityClient, urlFor } from "../../sanity";
+import { Collection } from "../../typings";
+import Link from "next/link";
 
-const NftPage: NextPage = () => {
+export const getServerSideProps: GetServerSideProps = async({ params }) => {
+    const query = `
+        *[_type=="collection" && slug.current==$id][0]{
+            _id,
+            title,
+            address,
+            description,
+            nftCollectionName,
+            mainImage {
+            asset
+            },
+            previewImage {
+            asset
+            },
+            slug {
+            current
+            },
+            creator -> {
+            _id,
+            name, 
+            address,
+            slug {
+            current
+            },
+            },
+        }
+    `;
+
+    const collection = await sanityClient.fetch(query, {
+        id: params?.id
+    });
+
+    if(!collection) {
+        return {
+            notFound: true,
+        }
+    }
+
+    return {
+        props: {
+            collection
+        }
+    }
+}
+
+interface NftPageProps {
+    collection: Collection
+}
+
+const NftPage: NextPage<NftPageProps> = ({ collection }) => {
 
     // Auth
     const connectWithMetamask = useMetamask(); // Connect to wallet with Metamask
     const address = useAddress(); // Get address from connected wallet
     const disconnect = useDisconnect(); // Function to call when want to disconnect from a wallet
 
-    console.log(address);
+    console.log(collection);
 
     return (
       <div className="flex h-screen flex-col lg:grid lg:grid-cols-10">
@@ -19,8 +71,8 @@ const NftPage: NextPage = () => {
                 <div className="bg-gradient-to-br from-yellow-400 to bg-purple-600 rounded-xl">
                     <div className="w-44 rounded-3xl p-2 lg:h-96 lg:w-72">
                         <Image
-                            src="/images/laser_ape.png"
-                            alt="Animated Ape wearing a black t-shirt and a navy captain hat with laser beam coming from the eyes."
+                            src={urlFor(collection.previewImage).url()}
+                            alt={collection.title}
                             height={400}
                             width={300}
                             objectFit="cover"
@@ -30,8 +82,8 @@ const NftPage: NextPage = () => {
                 </div>
             </div>
             <div className="text-center p-5 space-y-2">
-                <h1 className="text-4xl font-bold text-white"> Nft Den Apes 🦧</h1>
-                <h2 className="text-xl text-gray-300">A collection of apes who love Next.js!</h2>
+                <h1 className="text-4xl font-bold text-white">{collection.nftCollectionName}</h1>
+                <h2 className="text-xl text-gray-300">{collection.description}</h2>
 
             </div>
         </div>
@@ -40,9 +92,11 @@ const NftPage: NextPage = () => {
         <div className="flex flex-1 flex-col p-12 lg:col-span-6">
             {/* Header */}
             <header className="flex items-center justify-between">
-                <h3 className="w-52 cursor-pointer text-xl sm:w-80">
-                    The <span className="font-extrabold underline decoration-pink-600/50">Nft Den</span> Market Place 🛒
-                </h3>
+                <Link href="/">
+                    <h3 className="w-52 cursor-pointer text-xl sm:w-80">
+                        The <span className="font-extrabold underline decoration-pink-600/50">Nft Den</span> Market Place 🛒
+                    </h3>
+                </Link>
                 <button onClick={() => address ? disconnect() : connectWithMetamask()} 
                     className="rounded-full bg-rose-400 px-4 py-2 text-xs text-white font-bold lg:px-5 lg:py-3 lg:text-base"
                 >
@@ -61,15 +115,15 @@ const NftPage: NextPage = () => {
             <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:justify-center">
                 <div className="w-80 pb-10 lg:h-40 overflow-hidden">
                     <Image
-                        src="/images/many_apes.jpg"
-                        alt="Collage of various animates apes with different clothing features."
+                        src={urlFor(collection.mainImage).url()}
+                        alt={collection.description}
                         height={600}
                         width={700}
                         objectFit="cover"
                         layout="responsive"
                     />
                 </div>
-                <h3 className="text-3xl font-bold lg:text-5xl lg:font-extrabold">The Nft Den Coding Club | Nft Mint</h3>
+                <h3 className="text-3xl font-bold lg:text-5xl lg:font-extrabold">{collection.title}</h3>
                 <p className="pt-2 text-xl text-green-500">12/40 Nfts claimed</p>
             </div>
             {/* Mint Button */}
