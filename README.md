@@ -18,3 +18,6 @@ Visit the deployed site [here](https://nft-den.vercel.app/).
 - Sanity CMS
 - MetaMask
 - ThirdWeb
+
+## NPM Packages
+- React-hot-toast
