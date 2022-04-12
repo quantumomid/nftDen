@@ -1,9 +1,11 @@
 import { GetServerSideProps, NextPage } from "next";
 import Image from "next/image";
-import { useAddress, useDisconnect, useMetamask } from "@thirdweb-dev/react";
+import { useAddress, useDisconnect, useMetamask, useNFTDrop } from "@thirdweb-dev/react";
 import { sanityClient, urlFor } from "../../sanity";
 import { Collection } from "../../typings";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export const getServerSideProps: GetServerSideProps = async({ params }) => {
     const query = `
@@ -55,13 +57,33 @@ interface NftPageProps {
 }
 
 const NftPage: NextPage<NftPageProps> = ({ collection }) => {
+    const [claimedSupply, setClaimedSupply] = useState<number>(0);
+    const [totalSupply, setTotalSupply] = useState<BigNumber>();
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const nftDrop = useNFTDrop(collection.address);
+    console.log(nftDrop);
 
     // Auth
     const connectWithMetamask = useMetamask(); // Connect to wallet with Metamask
     const address = useAddress(); // Get address from connected wallet
     const disconnect = useDisconnect(); // Function to call when want to disconnect from a wallet
 
-    console.log(collection);
+    useEffect(() => {
+        if(!nftDrop) return;
+
+        const fetchNftDropData = async() => {
+            const claimed = await nftDrop.getAllClaimed();
+            const total = await nftDrop.totalSupply();
+
+            setClaimedSupply(claimed.length);
+            setTotalSupply(total);
+
+            setLoading(false);
+        }
+
+        fetchNftDropData();
+    }, [nftDrop]);
 
     return (
       <div className="flex h-screen flex-col lg:grid lg:grid-cols-10">
@@ -124,7 +146,20 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
                     />
                 </div>
                 <h3 className="text-3xl font-bold lg:text-5xl lg:font-extrabold">{collection.title}</h3>
-                <p className="pt-2 text-xl text-green-500">12/40 Nfts claimed</p>
+                {loading 
+                    ? 
+                <p className="pt-2 text-xl text-green-500 animate-pulse">Loading Supply Count ...</p>
+                    :
+                <p className="pt-2 text-xl text-green-500">{claimedSupply}/{totalSupply?.toString()} Nfts claimed</p>
+                }
+                {loading && (
+                    <Image 
+                        src="/images/loading.gif"
+                        alt="Animated Gif of three moving dots to represent a loading event"
+                        height={300}
+                        width={300}
+                    />
+                )}
             </div>
             {/* Mint Button */}
             <button className="h-16 bg-red-600 w-full rounded-full text-white font-bold mt-10">
