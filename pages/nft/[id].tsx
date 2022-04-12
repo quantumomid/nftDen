@@ -63,7 +63,6 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
     const [priceInEth, setPriceInEth] = useState<string>();
 
     const nftDrop = useNFTDrop(collection.address);
-    console.log(nftDrop);
 
     // Auth
     const connectWithMetamask = useMetamask(); // Connect to wallet with Metamask
@@ -96,6 +95,27 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
 
         fetchPrice();
     }, [nftDrop]);
+
+    const mintNft = () => {
+        if(!nftDrop || !address) return;
+
+        const quantity = 1;
+
+        setLoading(true);
+
+        nftDrop
+            .claimTo(address, quantity).then(async(tx) => {
+                const reciept = tx[0].receipt; // The transaction receipt
+                const claimedTokenId = tx[0].id; // The id of the Nft claimed
+                const claimedNft = await tx[0].data(); // Get claimed nft metadata
+                console.log({reciept, claimedTokenId, claimedNft});
+
+            }).catch(err => {
+                console.log(err);
+            }).finally(() => {
+                setLoading(false);
+            });
+    }
 
     return (
       <div className="flex h-screen flex-col lg:grid lg:grid-cols-10">
@@ -175,6 +195,7 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
             </div>
             {/* Mint Button */}
             <button 
+                onClick={mintNft}
                 disabled={loading || claimedSupply===totalSupply?.toNumber() || !address} 
                 className="h-16 bg-red-600 disabled:bg-gray-400 w-full rounded-full text-white font-bold mt-10"
             >
