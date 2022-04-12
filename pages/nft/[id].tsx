@@ -60,6 +60,7 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
     const [claimedSupply, setClaimedSupply] = useState<number>(0);
     const [totalSupply, setTotalSupply] = useState<BigNumber>();
     const [loading, setLoading] = useState<boolean>(true);
+    const [priceInEth, setPriceInEth] = useState<string>();
 
     const nftDrop = useNFTDrop(collection.address);
     console.log(nftDrop);
@@ -83,6 +84,17 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
         }
 
         fetchNftDropData();
+    }, [nftDrop]);
+    
+    useEffect(() => {
+        if(!nftDrop) return;
+
+        const fetchPrice = async () => {
+            const claimConditions = await nftDrop.claimConditions.getAll();
+            setPriceInEth(claimConditions?.[0].currencyMetadata.displayValue);
+        }
+
+        fetchPrice();
     }, [nftDrop]);
 
     return (
@@ -162,8 +174,24 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
                 )}
             </div>
             {/* Mint Button */}
-            <button className="h-16 bg-red-600 w-full rounded-full text-white font-bold mt-10">
-                Mint NFT (0.01 ETH)
+            <button 
+                disabled={loading || claimedSupply===totalSupply?.toNumber() || !address} 
+                className="h-16 bg-red-600 disabled:bg-gray-400 w-full rounded-full text-white font-bold mt-10"
+            >
+                {loading 
+                    ?
+                <>Loading</>
+                    :
+                    claimedSupply===totalSupply?.toNumber()
+                    ?
+                <>SOLD OUT</>
+                    :
+                    !address
+                    ?
+                <>Sign in to Mint</>
+                    :
+                <span>Mint NFT ({priceInEth} ETH)</span>
+                }
             </button>
         </div>
       </div>
