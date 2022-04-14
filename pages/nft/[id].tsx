@@ -151,10 +151,10 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
     }
 
     return (
-      <div className="flex h-screen flex-col lg:grid lg:grid-cols-10">
+      <main className="flex h-screen flex-col lg:grid lg:grid-cols-10">
           <Toaster position="bottom-center" />
         {/* Left */}
-        <div className="flex flex-col items-center justify-center bg-gradient-to-br from-cyan-800 to bg-rose-500 lg:col-span-4 lg:min-h-screen">
+        <section className="flex flex-col items-center justify-center bg-gradient-to-br from-cyan-800 to bg-rose-500 lg:col-span-4 lg:min-h-screen">
             <div className="flex flex-col items-center justify-center py-2">
                 <div className="bg-gradient-to-br from-yellow-400 to bg-purple-600 rounded-xl">
                     <div className="w-44 rounded-3xl p-2 lg:h-96 lg:w-72">
@@ -172,12 +172,11 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
             <div className="text-center p-5 space-y-2">
                 <h1 className="text-4xl font-bold text-white">{collection.nftCollectionName}</h1>
                 <h2 className="text-xl text-gray-300">{collection.description}</h2>
-
             </div>
-        </div>
+        </section>
 
         {/* Right */}
-        <div className="flex flex-1 flex-col p-12 lg:col-span-6">
+        <section className="flex flex-1 flex-col p-12 lg:col-span-6">
             {/* Header */}
             <header className="flex items-center justify-between">
                 <Link href="/">
@@ -200,7 +199,7 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
             )}
 
             {/* Content */}
-            <div className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:justify-center">
+            <article className="mt-10 flex flex-1 flex-col items-center space-y-6 text-center lg:justify-center">
                 <div className="w-80 pb-10 lg:h-40 overflow-hidden">
                     <Image
                         src={urlFor(collection.mainImage).url()}
@@ -226,7 +225,7 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
                         width={300}
                     />
                 )}
-            </div>
+            </article>
             {/* Mint Button */}
             <button 
                 onClick={mintNft}
@@ -248,9 +247,9 @@ const NftPage: NextPage<NftPageProps> = ({ collection }) => {
                 <span>Mint NFT ({priceInEth} ETH)</span>
                 }
             </button>
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
   
-export default NftPage
+export default NftPage;
